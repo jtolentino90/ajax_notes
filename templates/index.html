@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title> Ajax Notes </title>
+		<meta name="description" content="Ajax Notes.">
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+		<!-- <link rel="stylesheet" type="text/css" href="style.css"> -->
+	</head>
+
+
+	<body>
+      <h1> Notes </h1>
+      <form action="/create" method="post" id='create'>
+         <p>
+            <label> Title: </label>
+            <input type="text" name="title">
+         </p>
+         <p>
+            <label> Note: </label>
+            <textarea name="description"> Please add description... </textarea>
+         </p>
+         <input type="submit" value="Add title & description">
+      </form>
+
+
+      <div id="notes">
+        {% for note in notes %}
+          <div class='note'>
+		  <hr>
+		  <form action="/delete/{{note['id']}}" method="post" id='delete'>
+			  <input type="submit" value="delete">
+		  </form>
+		  <form action="/update/{{note['id']}}" method="post" id='update'>
+			  <input type="submit" value="update">
+		   	<h1>{{ note['id']}} </h1>
+            <h2 name = 'title' >{{ note['title'] }}</h2>
+            <p name = 'description' >{{ note['description'] }}</p>
+		</form>
+          </div>
+        {% endfor %}
+      </div>
+    </body>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script>
+		function html_str(res){
+			var html_str = ""
+			for (var i=0; i < res.length; i++){
+				html_str += "<section class ='note'>\n";
+				html_str += "<form action='/update" + res[i].id + "' method = 'POST' id='update'>\n";
+				if (res[i].description){
+					html_str += res[i].description;
+				}
+				html_str += "</textarea>\n";
+				html_str += "<input type='submit' value ='update'>\n";
+				html_str += "</form>\n";
+				html_str += "<form action='/delete" + res[i].id + "' method='POST' id='delete'>\n";
+				html_str += "<input type='submit' value='delete'>\n";
+				html_str += "</form>\n";
+				html_str += "</section>\n";
+			}
+			return html_str;
+		}
+
+
+		$(document).ready(function(){
+			console.log('Document ready!');
+
+			$(document).on('click', 'h2', function(){
+				console.log('Click received!')
+				var title = $(this).html();
+
+                console.log(title.slice(0,25));
+                if (title.slice(0,12) != "<input type="){
+					var html_str = "<input type='text' name='title' value='" + title + "'>\n";
+                    $(this).html(html_str);
+                }
+			});
+
+			$(document).on('submit', 'form', function(){
+				console.log('form submit received');
+				if (id == 'update'){
+					var url = $(this).attr('action');
+					$.post(url, $(this).serialize(), function(res){
+						$('#notes').html(html_str(res));
+					}, 'json');
+				}
+				return false;
+			});
+		});
+	</script>
+
+</html>
